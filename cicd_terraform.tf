@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14.0"
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -18,15 +27,15 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "ci-cd-cluster"
   cluster_version = "1.27"
-  subnet_ids      = module.vpc.public_subnets
+  subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
 
   eks_managed_node_groups = {
     spot_nodes = {
-      desired_size = 3
-      min_size     = 3
-      max_size     = 7
-      instance_types = ["t3.medium"]
+      desired_size = 2
+      min_size     = 1
+      max_size     = 6
+      instance_types = ["t3.medium", "t3.large", "m5.large"]
       capacity_type = "SPOT"
     }
   }
@@ -54,7 +63,6 @@ resource "aws_secretsmanager_secret_version" "database" {
 
 # RDS PostgreSQL Database
 module "database" {
-  family              = "postgres14"
   source              = "terraform-aws-modules/rds/aws"
   identifier          = "ci-cd-db"
   engine              = "postgres"
@@ -63,8 +71,9 @@ module "database" {
   allocated_storage   = 20
   db_name             = "cicddb"
   username           = "admin"
-  password           = aws_secretsmanager_secret_version.database.secret_string
+  password           = jsondecode(aws_secretsmanager_secret_version.database.secret_string)["password"]
   vpc_security_group_ids = [module.security.security_group_id]
+  family = "postgres14"
 }
 
 # Deploy Jenkins using Helm
@@ -89,6 +98,30 @@ resource "helm_release" "argocd" {
     name  = "server.service.type"
     value = "LoadBalancer"
   }
+}
+
+# ArgoCD Git Repository Configuration
+resource "kubectl_manifest" "argocd_git_repo" {
+  yaml_body = <<YAML
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: eks-ci-cd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/ycetin94/eks-ci-cd"
+    targetRevision: main
+    path: "helm/app-chart"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+YAML
 }
 
 # Deploy Flask + React Application
@@ -202,11 +235,11 @@ resource "helm_release" "prometheus" {
 
 # Outputs
 output "jenkins_url" {
-  value = "https://${helm_release.jenkins.metadata[0].name}.elb.amazonaws.com"
+  value = helm_release.jenkins.metadata[0].name
 }
 
 output "argocd_url" {
-  value = "https://${helm_release.argocd.metadata[0].name}.elb.amazonaws.com"
+  value = helm_release.argocd.metadata[0].name
 }
 
 output "app_url" {
