@@ -22,30 +22,46 @@ module "vpc" {
   enable_nat_gateway = true
 }
 
-# Create an EKS Cluster with Spot Instances
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = "ci-cd-cluster"
-  cluster_version = "1.27"
-  subnet_ids      = module.vpc.private_subnets
-  vpc_id          = module.vpc.vpc_id
-
-  eks_managed_node_groups = {
-    spot_nodes = {
-      desired_size = 2
-      min_size     = 1
-      max_size     = 6
-      instance_types = ["t3.medium", "t3.large", "m5.large"]
-      capacity_type = "SPOT"
-    }
-  }
-}
-
 # Security Groups
 module "security" {
   source = "terraform-aws-modules/security-group/aws"
   name   = "eks-security-group"
   vpc_id = module.vpc.vpc_id
+}
+
+# IAM Role for EKS Nodes
+resource "aws_iam_role" "eks_node_role" {
+  name = "eks-node-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+# Create an EKS Cluster with Spot Instances
+module "eks" {
+  source          = "terraform-aws-modules/eks/aws"
+  cluster_name    = "ci-cd-cluster"
+  cluster_version = "1.31"
+  subnet_ids      = module.vpc.private_subnets
+  vpc_id          = module.vpc.vpc_id
+
+  eks_managed_node_groups = {
+    spot_nodes = {
+      desired_size = 3 
+      min_size     = 1
+      max_size     = 7
+      instance_types = ["t3.medium", "t3.large", "m5.large"]
+      capacity_type = "SPOT"
+      iam_role_arn  = aws_iam_role.eks_node_role.arn
+    }
+  }
+
+  depends_on = [aws_iam_role.eks_node_role]
 }
 
 # AWS Secrets Manager for Database Credentials
@@ -59,6 +75,8 @@ resource "aws_secretsmanager_secret_version" "database" {
     username = "admin"
     password = "change_this_password"
   })
+
+  depends_on = [aws_secretsmanager_secret.database]
 }
 
 # RDS PostgreSQL Database
@@ -66,7 +84,7 @@ module "database" {
   source              = "terraform-aws-modules/rds/aws"
   identifier          = "ci-cd-db"
   engine              = "postgres"
-  engine_version      = "14.5"
+  engine_version      = "14.4"
   instance_class      = "db.t3.medium"
   allocated_storage   = 20
   db_name             = "cicddb"
@@ -74,6 +92,11 @@ module "database" {
   password           = jsondecode(aws_secretsmanager_secret_version.database.secret_string)["password"]
   vpc_security_group_ids = [module.security.security_group_id]
   family = "postgres14"
+
+  depends_on = [
+    module.security,
+    aws_secretsmanager_secret_version.database
+  ]
 }
 
 # Deploy Jenkins using Helm
@@ -86,6 +109,8 @@ resource "helm_release" "jenkins" {
     name  = "controller.serviceType"
     value = "LoadBalancer"
   }
+
+  depends_on = [module.eks]
 }
 
 # Deploy ArgoCD using Helm
@@ -98,6 +123,8 @@ resource "helm_release" "argocd" {
     name  = "server.service.type"
     value = "LoadBalancer"
   }
+
+  depends_on = [module.eks]
 }
 
 # ArgoCD Git Repository Configuration
@@ -122,6 +149,8 @@ spec:
       prune: true
       selfHeal: true
 YAML
+
+  depends_on = [helm_release.argocd]
 }
 
 # Deploy Flask + React Application
@@ -192,6 +221,8 @@ resource "kubernetes_service" "flask_react_service" {
 
     type = "LoadBalancer"
   }
+
+  depends_on = [kubernetes_deployment.flask_react_app]
 }
 
 # Kubernetes Ingress for HTTPS with Let's Encrypt
@@ -223,6 +254,8 @@ resource "kubernetes_ingress" "app_ingress" {
       secret_name = "ycsuisse-tls"
     }
   }
+
+  depends_on = [kubernetes_service.flask_react_service]
 }
 
 # Deploy Prometheus and Grafana
@@ -231,6 +264,8 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   namespace  = "monitoring"
+
+  depends_on = [module.eks]
 }
 
 # Outputs
@@ -245,4 +280,3 @@ output "argocd_url" {
 output "app_url" {
   value = "https://ycsuisse.click"
 }
-
