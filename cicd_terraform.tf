@@ -11,6 +11,53 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# IAM Role for EKS Cluster
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "eks-cluster-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "eks.amazonaws.com" }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster_role.name
+}
+
+# IAM Role for EKS Nodes
+resource "aws_iam_role" "eks_node_role" {
+  name = "eks-node-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+# Attach Required Policies to EKS Node Role
+resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_node_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_node_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_readonly_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_node_role.name
+}
+
 # Create a VPC
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -29,54 +76,72 @@ module "security" {
   vpc_id = module.vpc.vpc_id
 }
 
-# IAM Role for EKS Nodes
-resource "aws_iam_role" "eks_node_role" {
-  name = "eks-node-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "ec2.amazonaws.com" }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
 # Create an EKS Cluster with Spot Instances
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "ci-cd-cluster"
-  cluster_version = "1.31"
+  cluster_version = "1.32"
   subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
+  iam_role_arn    = aws_iam_role.eks_cluster_role.arn
 
   eks_managed_node_groups = {
     spot_nodes = {
-      desired_size = 3 
-      min_size     = 1
-      max_size     = 7
+      desired_size   = 2 
+      min_size       = 1
+      max_size       = 7
       instance_types = ["t3.medium", "t3.large", "m5.large"]
-      capacity_type = "SPOT"
-      iam_role_arn  = aws_iam_role.eks_node_role.arn
+      capacity_type  = "SPOT"
+      iam_role_arn   = aws_iam_role.eks_node_role.arn
     }
   }
 
-  depends_on = [aws_iam_role.eks_node_role]
+  depends_on = [aws_iam_role.eks_node_role, aws_iam_role.eks_cluster_role]
 }
 
+data "aws_eks_cluster" "eks" {
+  name = module.eks.cluster_name
+
+  depends_on = [module.eks]
+}
+
+data "aws_eks_cluster_auth" "eks" {
+  name = module.eks.cluster_name
+
+  depends_on = [module.eks]
+}
+
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks.endpoint
+  token                  = data.aws_eks_cluster_auth.eks.token
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
+    
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.eks.endpoint
+    token                  = data.aws_eks_cluster_auth.eks.token
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority[0].data)
+  }
+}
+
+
 # AWS Secrets Manager for Database Credentials
-resource "aws_secretsmanager_secret" "database" {
+data "aws_secretsmanager_secret" "database" {
   name = "eks-db-secret"
 }
 
+
 resource "aws_secretsmanager_secret_version" "database" {
-  secret_id     = aws_secretsmanager_secret.database.id
+  secret_id     = data.aws_secretsmanager_secret.database.id
   secret_string = jsonencode({
     username = "admin"
     password = "change_this_password"
   })
 
-  depends_on = [aws_secretsmanager_secret.database]
+  
 }
 
 # RDS PostgreSQL Database
@@ -280,3 +345,14 @@ output "argocd_url" {
 output "app_url" {
   value = "https://ycsuisse.click"
 }
+
+
+
+
+
+
+
+
+
+
+
