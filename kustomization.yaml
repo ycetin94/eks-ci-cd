@@ -1,0 +1,5 @@
+resources:
+  - infrastructure/cert-manager.yaml
+  - infrastructure/ingress-nginx.yaml
+  - infrastructure/cluster-issuer.yaml
+  - infrastructure/argocd-ingress.yaml
