@@ -712,7 +712,7 @@ controller:
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
     annotations:
       alb.ingress.kubernetes.io/certificate-arn: >-
-        arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+        arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
       alb.ingress.kubernetes.io/group.name: test-eks
       alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
       alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
@@ -731,11 +731,11 @@ controller:
     # configures the hostname e.g. jenkins.example.com
     # -- Ingress hostname
 
-    hostName: jenkins.test.voltran.link
+    hostName: jenkins.ycsuisse.click 
     tls:
     # - secretName: jenkins.cluster.local
       - hosts:
-         - jenkins.test.voltran.link
+         - jenkins.ycsuisse.click 
 
     #hostName:
     # -- Hostname to serve assets from

@@ -6,7 +6,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/certificate-arn: >-
-      arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
     alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
@@ -22,10 +22,10 @@ spec:
   ingressClassName: alb
   tls:
     - hosts:
-        - argocd.test.voltran.link
+        - argocd.ycsuisse.click 
       secretName: argocd-cert
   rules:
-    - host: argocd.test.voltran.link
+    - host: argocd.ycsuisse.click 
       http:
         paths:
           - path: /
@@ -45,7 +45,7 @@ metadata:
   namespace: "argocd"
   annotations:
     alb.ingress.kubernetes.io/certificate-arn: 
-      arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "20"
     alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
@@ -58,7 +58,7 @@ metadata:
 spec:
   ingressClassName: "alb"
   rules:
-  - host: "keycloak.test.voltran.link"
+  - host: "keycloak.ycsuisse.click "
     http:
       paths:
       - path: /

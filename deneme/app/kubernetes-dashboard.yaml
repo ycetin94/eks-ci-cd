@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/EmreYsrc/apps.git
+    repoURL: https://github.com/ycetin94/eks-ci-cd.git
     targetRevision: main
     path: apps/kubernetes-dashboard
   destination:
@@ -28,7 +28,7 @@ metadata:
       { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/certificate-arn: >-
-      arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
     alb.ingress.kubernetes.io/healthcheck-port: traffic-port
@@ -43,7 +43,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: kubernetes.test.voltran.link
+  - host: kubernetes.ycsuisse.click 
     http:
       paths:
       - backend:
@@ -55,7 +55,7 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - kubernetes.test.voltran.link
+    - kubernetes.ycsuisse.click 
     secretName: kubernetes-dashboard-certs
 
 # Read-Only Developer Service Account & Role and RoleBinding for kubernetes-dashboard namespace    
@@ -70,7 +70,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/certificate-arn: >-
-      arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
     alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
@@ -86,10 +86,10 @@ spec:
   ingressClassName: alb
   tls:
     - hosts:
-        - argocd.test.voltran.link
+        - argocd.ycsuisse.click 
       secretName: argocd-cert
   rules:
-    - host: argocd.test.voltran.link
+    - host: argocd.ycsuisse.click 
       http:
         paths:
           - path: /

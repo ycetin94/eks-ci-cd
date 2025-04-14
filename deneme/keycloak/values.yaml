@@ -605,7 +605,7 @@ ingress:
   apiVersion: ""
   ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
-  hostname: keycloak.test.voltran.link
+  hostname: keycloak.ycsuisse.click 
   ## @param ingress.path [string] Default path for the ingress record (evaluated as template)
   ##
   path: "{{ .Values.httpRelativePath }}"
@@ -623,7 +623,7 @@ ingress:
   ##
   annotations:
     alb.ingress.kubernetes.io/certificate-arn: 
-      arn:aws:acm:eu-west-1:187751842432:certificate/8ee6a4aa-99f8-4a9b-bacd-ac0eaf89516e
+      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "20"
     alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
@@ -1176,11 +1176,11 @@ keycloakConfigCli:
   podTolerations: []
   extraEnvVars: |
     - name: KEYCLOAK_HOSTNAME
-      value: "keycloak.test.voltran.link"
+      value: "keycloak.ycsuisse.click "
     - name: KEYCLOAK_FRONTEND_URL
-      value: "https://keycloak.test.voltran.link"
+      value: "https://keycloak.ycsuisse.click "
     - name: KEYCLOAK_CORS_ORIGINS
-      value: "https://keycloak.test.voltran.link" # Your frontend URL, add more if needed
+      value: "https://keycloak.ycsuisse.click " # Your frontend URL, add more if needed
     - name: KEYCLOAK_CORS_ALLOW_METHODS
       value: "*"
     - name: KEYCLOAK_CORS_ALLOW_HEADERS
