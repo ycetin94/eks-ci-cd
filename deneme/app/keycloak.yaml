@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/ycetin94/eks-ci-cd.git
-    path: deneme/keycloak
+    repoURL: https://github.com/EmreYsrc/apps.git
+    path: apps/keycloak
     targetRevision: main
     helm:
       valueFiles:
@@ -32,7 +32,7 @@ metadata:
       arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     alb.ingress.kubernetes.io/group.name: test-eks
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "20"
-    alb.ingress.kubernetes.io/custom-http-headers: "Content-Security-Policy=frame-src 'self' http://keycloak.ycsuisse.click "
+    alb.ingress.kubernetes.io/custom-http-headers: "Content-Security-Policy=frame-src 'self' http://keycloak.ycsuisse.click"
     alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
     alb.ingress.kubernetes.io/healthcheck-port: "8080"
     alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
