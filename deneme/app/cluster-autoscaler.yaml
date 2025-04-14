@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/EmreYsrc/apps.git
+    repoURL: https://github.com/ycetin94/eks-ci-cd.git  
     path: apps/cluster-autoscaler
     targetRevision: main
     helm:
