@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: argocd-cm
-  namespace: argocd
-data:
-  url: https://argocd.ycsuisse.click
-  admin.enabled: "true"
-  application.instanceLabelKey: argocd.argoproj.io/instance
