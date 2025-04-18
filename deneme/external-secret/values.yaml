@@ -105,7 +105,7 @@ serviceAccount:
   automount: true
   # -- Annotations to add to the service account.
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::187751842432:role/secrets_manager_role
+    eks.amazonaws.com/role-arn: arn:aws:iam::187751842432:role/secrets_manager_role  ### değiştir 
   # -- Extra Labels to add to the service account.
   extraLabels: {}
   # -- The name of the service account to use.

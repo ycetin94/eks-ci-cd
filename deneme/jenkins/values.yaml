@@ -731,11 +731,11 @@ controller:
     # configures the hostname e.g. jenkins.example.com
     # -- Ingress hostname
 
-    hostName: jenkins.test.voltran.link
+    hostName: jenkins.ycsuisse.click
     tls:
     # - secretName: jenkins.cluster.local
       - hosts:
-         - jenkins.test.voltran.link
+         - jenkins.ycsuisse.click
 
     #hostName:
     # -- Hostname to serve assets from
