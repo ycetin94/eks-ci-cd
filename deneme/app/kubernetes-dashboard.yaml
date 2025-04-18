@@ -68,26 +68,15 @@ metadata:
   name: argocd-server
   namespace: argocd
   annotations:
-    alb.ingress.kubernetes.io/backend-protocol: HTTPS
-    alb.ingress.kubernetes.io/certificate-arn: >-
-      arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
-    alb.ingress.kubernetes.io/group.name: test-eks
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
-    alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
-    alb.ingress.kubernetes.io/healthcheck-port: '8080'
-    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/success-codes: '404'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
     alb.ingress.kubernetes.io/target-type: ip
-    meta.helm.sh/release-name: argocd
-    meta.helm.sh/release-namespace: argocd
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    # external-dns annotation varsa DNS otomatik güncellenir
+    external-dns.alpha.kubernetes.io/hostname: argocd.ycsuisse.click
 spec:
-  ingressClassName: alb
-  tls:
-    - hosts:
-        -  argocd.ycsuisse.click
-      secretName: argocd-cert
   rules:
     - host: argocd.ycsuisse.click
       http:
