@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/ycetin94/eks-ci-cd.git
     targetRevision: main
-    path: apps/kubernetes-dashboard
+    path: app/kubernetes-dashboard
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
