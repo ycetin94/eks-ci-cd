@@ -42,6 +42,9 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /healthz
     alb.ingress.kubernetes.io/healthcheck-port: "8080"
     alb.ingress.kubernetes.io/backend-protocol: HTTP
+    applicationSet:
+  ingress:
+    enabled: false
 spec:
   rules:
     - host: argocd.ycsuisse.click
