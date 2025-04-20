@@ -2222,32 +2222,27 @@ server:
 
   # Argo CD server ingress configuration
   # ~values.yaml içindeki server.ingress bloğunu tamamen kaldırın (yakl. 2227–2256 arası)
-  annotations:
-      alb.ingress.kubernetes.io/certificate-arn: >-
-        arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
-      alb.ingress.kubernetes.io/group.name: test-eks
-      alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
-      alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
-      alb.ingress.kubernetes.io/healthcheck-port: '8080'
-      alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/success-codes: '404'
-      alb.ingress.kubernetes.io/target-type: ip
-  ingressClassName: alb
+  server:
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:…
+      # …diğer ALB anotasyonları…
+    hosts:
+      - host: argocd.ycsuisse.click
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - argocd.ycsuisse.click
+        secretName: argocd-tls
+  # GKE özel şablonunu (nil-pointer’ı önlemek için) devre dışı bırakın:
+  gke:
+    managedCertificate:
+      enabled: false
 
-    # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
-    # -- Ingress path
-  path:
-
-    # configures the hostname e.g. jenkins.example.com
-    # -- Ingress hostname
-
-  hostName: argocd.ycsuisse.click
-  tls:
-    # - secretName: jenkins.cluster.local
-    - hosts:
-        - argocd.ycsuisse.click
 
   
 
