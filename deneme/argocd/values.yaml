@@ -2221,38 +2221,39 @@ server:
     automountServiceAccountToken: true
 
   # Argo CD server ingress configuration
+  # ~values.yaml içindeki server.ingress bloğunu tamamen kaldırın (yakl. 2227–2256 arası)
   server:
-  # … (mevcut server: altında diğer ayarlar)
   ingress:
     enabled: true
     ingressClassName: alb
-    #hostname: argocd.ycsuisse.click
-    pathType: Prefix
-    alb.ingress.kubernetes.io/certificate-arn: >-
-        arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
-    alb.ingress.kubernetes.io/group.name: test-eks
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
-    alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
-    alb.ingress.kubernetes.io/healthcheck-port: '8080'
-    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/success-codes: '404'
-    alb.ingress.kubernetes.io/target-type: ip
-    
 
-    # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
-    # -- Ingress path
-    #path:
+    # Tüm alb.ingress.kubernetes.io/* anotasyonları buraya taşıyoruz
+    annotations:
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
+      alb.ingress.kubernetes.io/group.name: test-eks
+      alb.ingress.kubernetes.io/healthcheck-interval-seconds: "20"
+      alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
+      alb.ingress.kubernetes.io/healthcheck-port: "8080"
+      alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/success-codes: "404"
+      alb.ingress.kubernetes.io/target-type: ip
 
-    # configures the hostname e.g. jenkins.example.com
-    # -- Ingress hostname
+    # Host ve path’leri hosts: içine alıyoruz
+    hosts:
+      - host: argocd.ycsuisse.click
+        paths:
+          - path: /
+            pathType: Prefix
 
-    hostName: argocd.ycsuisse.click
+    # TLS, eğer alb annotation’ı ile ACM sertifikası takılıysa secretName’e varsayılan bir isim de verebilirsiniz
     tls:
-    # - secretName: jenkins.cluster.local
       - hosts:
-         - argocd.ycsuisse.click
+          - argocd.ycsuisse.click
+        secretName: argocd-tls
+
+  
 
     # Google specific options for Google Application Load Balancer
     # Applies only when `server.ingress.controller` is set to `gke`
