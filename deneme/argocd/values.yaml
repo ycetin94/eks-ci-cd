@@ -2254,7 +2254,7 @@ server:
     # Google specific options for Google Application Load Balancer
     # Applies only when `server.ingress.controller` is set to `gke`
     ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#google-cloud-load-balancers-with-kubernetes-ingress
-    #gke:
+    gke:
       # -- Google [BackendConfig] resource, for use with the GKE Ingress Controller
       # @default -- `{}` (See [values.yaml])
       ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#configuring_ingress_features_through_frontendconfig_parameters
