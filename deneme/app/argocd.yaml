@@ -35,7 +35,7 @@ metadata:
     # 3) ACM sertifikasını kullan
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
     # 4) Sadece HTTPS (443) dinlesin
-    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+    #alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
     # 5) Hedef tip: IP (pod’lara direkt)
     alb.ingress.kubernetes.io/target-type: ip
