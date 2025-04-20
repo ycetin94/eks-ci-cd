@@ -23,3 +23,40 @@ spec:
     
 
 
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    # 1) AWS ALB kullan
+    kubernetes.io/ingress.class: alb
+    # 2) İnternete açık
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # 3) ACM sertifikası
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
+    # 4) Yalnızca HTTPS (443)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    # 5) Hedef tipi: IP (pod’lara direkt)
+    alb.ingress.kubernetes.io/target-type: ip
+    # 6) Sağlık kontrolü
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-port: "8080"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  rules:
+    - host: argocd.ycsuisse.click
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - argocd.ycsuisse.click
