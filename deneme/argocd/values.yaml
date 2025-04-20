@@ -2221,43 +2221,78 @@ server:
     automountServiceAccountToken: true
 
   # Argo CD server ingress configuration
-server:
-  # Argo CD server ingress configuration
+  server:
+  # … (mevcut server: altında diğer ayarlar)
   ingress:
     enabled: true
-    controller: aws
     ingressClassName: alb
-    hostname: argocd.ycsuisse.click
-    path: /
+    #hostname: argocd.ycsuisse.click
     pathType: Prefix
-    tls: false
+    alb.ingress.kubernetes.io/certificate-arn: >-
+        arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
+    alb.ingress.kubernetes.io/group.name: test-eks
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
+    alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
+    alb.ingress.kubernetes.io/healthcheck-port: '8080'
+    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/success-codes: '404'
+    alb.ingress.kubernetes.io/target-type: ip
+    
 
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:767397753907:certificate/e7e88e2a-38b1-48c5-bab7-bda08429202f
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/healthcheck-path: /healthz
-      alb.ingress.kubernetes.io/healthcheck-port: "8080"
-      alb.ingress.kubernetes.io/backend-protocol: HTTP
+    # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
+    # -- Ingress path
+    #path:
 
-    extraHosts: []
-    extraPaths: []
-    extraRules: []
-    extraTls: []
+    # configures the hostname e.g. jenkins.example.com
+    # -- Ingress hostname
 
-    aws:
-      backendProtocolVersion: GRPC
-      serviceType: NodePort
+    hostName: argocd.ycsuisse.click
+    tls:
+    # - secretName: jenkins.cluster.local
+      - hosts:
+         - argocd.ycsuisse.click
 
+    # Google specific options for Google Application Load Balancer
+    # Applies only when `server.ingress.controller` is set to `gke`
+    ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#google-cloud-load-balancers-with-kubernetes-ingress
     gke:
+      # -- Google [BackendConfig] resource, for use with the GKE Ingress Controller
+      # @default -- `{}` (See [values.yaml])
+      ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#configuring_ingress_features_through_frontendconfig_parameters
       backendConfig: {}
-      frontendConfig: {}
-      managedCertificate:
-        create: true
-        extraDomains: []
+        # iap:
+        #  enabled: true
+        #  oauthclientCredentials:
+        #    secretName: argocd-secret
 
+      # -- Google [FrontendConfig] resource, for use with the GKE Ingress Controller
+      # @default -- `{}` (See [values.yaml])
+      ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#configuring_ingress_features_through_frontendconfig_parameters
+      frontendConfig: {}
+        # redirectToHttps:
+        #   enabled: true
+        #   responseCodeName: RESPONSE_CODE
+
+      # Managed GKE certificate for ingress hostname
+      managedCertificate:
+        # -- Create ManagedCertificate resource and annotations for Google Load balancer
+        ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
+        create: true
+        # -- Additional domains for ManagedCertificate resource
+        extraDomains: []
+          # - argocd.example.com
+
+  # Dedicated gRPC ingress for ingress controllers that supports only single backend protocol per Ingress resource
+  # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-2-multiple-ingress-objects-and-hosts
+  ingressGrpc:
+    # -- Enable an ingress resource for the Argo CD server for dedicated [gRPC-ingress]
+    enabled: false
+    # -- Additional ingress annotations for dedicated [gRPC-ingress]
+    annotations: {}
+    # -- Additional ingress labels for dedicated [gRPC-ingress]
+    labels: {}
     # -- Defines which ingress controller will implement the resource [gRPC-ingress]
     ingressClassName: ""
 
