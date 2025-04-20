@@ -10,8 +10,6 @@ spec:
     path: deneme/argocd
     targetRevision: main
     helm:
-      # Helm release adını sabitleyin
-      releaseName: argocd-server
       valueFiles:
         - values.yaml
   destination:
@@ -21,18 +19,7 @@ spec:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  ignoreDifferences:
-    - group: networking.k8s.io
-      kind: Ingress
-      jsonPointers:
-        - /metadata/annotations
-
+      #allowEmpty: true
+    
 
 
