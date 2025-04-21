@@ -23,17 +23,13 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: argocd.ycsuisse.click
-    http:
-      paths:
-      - backend:
-          service:
-            name: argocd-server 
-            port:
-              number: 443
-        path: /
-        pathType: Prefix
-  tls:
-  - hosts:
-    - argocd.ycsuisse.click
-    
+    - host: argocd.ycsuisse.click
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
