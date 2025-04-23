@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: camunda
-  namespace: camunda
+  namespace: argocd
 spec:
   project: default
   source:
@@ -14,7 +14,7 @@ spec:
       #  - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: camunda
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
