@@ -1,0 +1,70 @@
+{{- if .Values.connectors.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "connectors.fullname" . }}-configuration
+  labels:
+    {{- include "connectors.labels" . | nindent 4 }}
+data:
+  {{- if .Values.connectors.configuration }}
+  application.yml: |
+    {{ .Values.connectors.configuration | indent 4 | trim }}
+  {{- else }}
+  application.yml: |
+    server:
+      port: {{ .Values.connectors.service.serverPort }}
+    {{- if .Values.connectors.contextPath }}
+      servlet:
+        context-path: {{ .Values.connectors.contextPath | quote }}
+    {{- end }}
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: metrics,health,prometheus
+      endpoint:
+        health:
+          show-details: always
+          show-components: always
+          group:
+            readiness:
+              include:
+              - processDefinitionImport
+              - zeebeClient
+      context-path: /actuator
+
+    camunda:
+      client:
+        {{-  $proto := (lower .Values.core.readinessProbe.scheme) -}}
+        {{- $baseURLInternal := printf "%s://%s" $proto (include "core.fullname" . | trimAll "\"") }}
+        rest-address: {{ printf "%s:%v%s" $baseURLInternal .Values.core.service.httpPort .Values.core.contextPath }}
+        grpc-address: {{ printf "%s:%v" $baseURLInternal .Values.core.service.grpcPort }}
+        worker:
+          defaults:
+            max-jobs-active: 32
+            stream-enabled: true
+        mode: {{ .Values.global.security.authentication.method }}
+        {{- if eq .Values.global.security.authentication.method "basic" }}
+        auth:
+          {{- $user := first .Values.global.security.initialization.users }}
+          username: {{ $user.username | quote }}
+          password: {{ $user.password | quote }}
+        {{- else }}
+        auth:
+          token-url: {{ include "camundaPlatform.authIssuerBackendUrlTokenEndpoint" . }}
+          client-id: {{ include "connectors.authClientId" . | quote }}
+          client-secret: ${VALUES_CAMUNDA_IDENTITY_CLIENT_SECRET}
+          audience: {{ include "core.authAudience" . | quote }}
+        {{- end }}
+
+    logging:
+{{- with .Values.connectors.logging }}
+{{ . | toYaml | indent 6 }}
+{{- end }}
+  {{- range $key, $val := .Values.connectors.extraConfiguration }}
+  {{ $key }}: |
+    {{ $val | indent 4 | trim }}
+  {{- end }}
+{{- end }}
+{{- end }}
