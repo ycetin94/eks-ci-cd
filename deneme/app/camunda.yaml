@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: camunda
+  namespace: camunda
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ycetin94/eks-ci-cd.git
+    path: deneme/camunda
+    targetRevision: main
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
