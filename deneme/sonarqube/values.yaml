@@ -177,7 +177,7 @@ ingress:
       alb.ingress.kubernetes.io/group.name: test-eks
       alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
       alb.ingress.kubernetes.io/healthcheck-path: /dummy-path
-      alb.ingress.kubernetes.io/healthcheck-port: '9090'
+      alb.ingress.kubernetes.io/healthcheck-port: '9000'
       alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
       alb.ingress.kubernetes.io/scheme: internet-facing
