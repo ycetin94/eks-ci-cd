@@ -507,7 +507,7 @@ resources:
     ephemeral-storage: 1536M
 
 persistence:
-  enabled: false
+  enabled: true
   ## Set annotations on pvc
   annotations: {}
 
@@ -521,9 +521,9 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  storageClass:
+  storageClass: "gp2"
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 9Gi
   uid: 1000
   guid: 0
 
