@@ -205,13 +205,13 @@ spec:
     - host: sonarqube.ycsuisse.click
       http:
         paths:
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /
             backend:
               service:
-                name: sonarqube-server
+                name: sonarqube
                 port:
                   number: 9000
+            pathType: Prefix
   # kubernetes.io/tls-acme: "true"
 
   # Set the ingressClassName on the ingress record
