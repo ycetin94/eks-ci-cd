@@ -49,7 +49,7 @@ OpenShift:
     #  external: 'true'
 
 # Configure the edition of SonarQube Server to deploy: developer or enterprise
-# edition: ""
+edition: "developer"
 
 # Set the chart to use the latest released SonarQube Community Build
 community:
