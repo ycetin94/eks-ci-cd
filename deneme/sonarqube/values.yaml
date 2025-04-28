@@ -599,7 +599,7 @@ postgresql:
     enabled: true
     accessMode: ReadWriteOnce
     size: 20Gi
-    storageClass:
+    storageClass: "gp2"
   securityContext:
     enabled: true
     # fsGroup specification below are not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
