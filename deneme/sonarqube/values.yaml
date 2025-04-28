@@ -181,9 +181,9 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-  - hosts:
-      - sonarqube.ycsuisse.click
-    secretName: sonarqube-tls
+    - hosts:
+        - sonarqube.ycsuisse.click
+      secretName: sonarqube-tls
 
 
 
