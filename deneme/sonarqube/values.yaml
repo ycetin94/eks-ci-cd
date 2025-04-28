@@ -344,7 +344,7 @@ caCerts:
   #   path: my-certificate.crt
 
 initSysctl:
-  enabled: true
+  enabled: false
   vmMaxMapCount: 524288
   fsFileMax: 131072
   nofile: 131072
@@ -361,7 +361,7 @@ initSysctl:
 
 # This should not be required anymore, used to chown/chmod folder created by faulty CSI driver that are not applying properly POSIX fsgroup.
 initFs:
-  enabled: true
+  enabled: false
   # all initContainers use SonarQube image by default, but you can override it by setting the image field (ex image: ubuntu:24.04)
   # image:
   # Compatible with podSecurity standard baseline.
@@ -599,7 +599,7 @@ postgresql:
     enabled: true
     accessMode: ReadWriteOnce
     size: 20Gi
-    storageClass: "gp2"
+    storageClass: gp2
   securityContext:
     enabled: true
     # fsGroup specification below are not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
