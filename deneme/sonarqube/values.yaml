@@ -181,9 +181,10 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    - hosts:
-        - sonarqube.ycsuisse.click
-      secretName: sonarqube-tls      # oluşturduğunuz TLS secret’ın adı
+  - hosts:
+      - sonarqube.ycsuisse.click
+    secretName: sonarqube-tls
+
 
 
   # kubernetes.io/tls-acme: "true"
